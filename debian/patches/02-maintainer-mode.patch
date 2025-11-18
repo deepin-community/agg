@@ -1,0 +1,16 @@
+Author: Andrea Veri <and@debian.org>
+Description: Use AM_MAINTAINER_MODE, to avoid re-running autotools 
+ except when explicitly called in debian/rules.
+Forwarded: not-needed
+
+--- a/configure.ac
++++ b/configure.ac
+@@ -3,7 +3,7 @@
+ AC_CANONICAL_TARGET
+ AC_CONFIG_HEADERS(include/config.h)
+ AM_INIT_AUTOMAKE
+-
++AM_MAINTAINER_MODE
+ 
+ dnl Checks for programs.
+ AC_PROG_CC

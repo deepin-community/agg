@@ -1,4 +1,96 @@
 #!/usr/bin/make -f
 
+FLAVOURS := pic nonpic
+
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+export DEB_BUILD_MAINT_OPTIONS := hardening=+all
+CONFIGURE_ARGS_COMMON := --libdir=/usr/lib/$(DEB_HOST_MULTIARCH) --disable-examples --x-includes=/usr/include --x-libraries=/usr/lib/$(DEB_HOST_MULTIARCH)
+CONFIGURE_ARGS_pic := -with-pic --enable-gpc
+CONFIGURE_ARGS_nonpic := --enable-gpc
+DESTDIR_nonpic := debian/libagg-dev
+DESTDIR_pic := debian/libagg2-dev
+
+builddir = $(patsubst %,obj-%,$(1))
+
+define do-flavour
+
+configure-$(1): configure-$(1)-stamp
+	:
+configure-$(1)-stamp:
+	rm -rf $(CURDIR)/$(builddir)
+	mkdir -p $(CURDIR)/$(builddir)
+	find $(CURDIR)/* -maxdepth 0 -not -path '$(CURDIR)/obj-*' | \
+		xargs cp -rlf -t $(CURDIR)/$(builddir)
+	cd $(builddir) && env NOCONFIGURE=1 sh autogen.sh
+	dh_auto_configure --sourcedirectory=$(builddir) -- $(CONFIGURE_ARGS_COMMON) $(CONFIGURE_ARGS_$(1)) $(shell dpkg-buildflags --export=configure)
+	touch $$@
+
+build-$(1): build-$(1)-stamp
+	:
+build-$(1)-stamp: configure-$(1)
+	$(MAKE) -C $(builddir)
+	touch $$@
+
+install-$(1): install-$(1)-stamp
+	:
+install-$(1)-stamp: build-$(1)
+	$(MAKE) -C $(builddir) install DESTDIR=$(CURDIR)/$(DESTDIR_$(1))
+	touch $$@
+
+endef
+
+$(foreach f,$(FLAVOURS),$(eval $(call do-flavour,$(f))))
+
 %:
 	dh $@
+
+override_dh_auto_build: $(foreach f,$(FLAVOURS),build-$(f))
+	:
+
+override_dh_auto_install: $(foreach f,$(FLAVOURS),install-$(f))
+
+		# Fix names of PIC static libs
+	mv $(DESTDIR_pic)/usr/lib/$(DEB_HOST_MULTIARCH)/libaggfontfreetype.a \
+		$(DESTDIR_pic)/usr/lib/$(DEB_HOST_MULTIARCH)/libaggfontfreetype_pic.a
+	mv $(DESTDIR_pic)/usr/lib/$(DEB_HOST_MULTIARCH)/libaggplatformsdl.a \
+		$(DESTDIR_pic)/usr/lib/$(DEB_HOST_MULTIARCH)/libaggplatformsdl_pic.a
+	mv $(DESTDIR_pic)/usr/lib/$(DEB_HOST_MULTIARCH)/libaggplatformX11.a \
+		$(DESTDIR_pic)/usr/lib/$(DEB_HOST_MULTIARCH)/libaggplatformX11_pic.a
+	mv $(DESTDIR_pic)/usr/lib/$(DEB_HOST_MULTIARCH)/libagg.a \
+		$(DESTDIR_pic)/usr/lib/$(DEB_HOST_MULTIARCH)/libagg_pic.a
+	mv $(DESTDIR_pic)/usr/lib/$(DEB_HOST_MULTIARCH)/libagggpc.a \
+		$(DESTDIR_pic)/usr/lib/$(DEB_HOST_MULTIARCH)/libagggpc_pic.a
+
+		# Cross-install static libs
+	install -m644 $(DESTDIR_nonpic)/usr/lib/$(DEB_HOST_MULTIARCH)/*.a \
+		$(CURDIR)/debian/libagg2-dev/usr/lib/$(DEB_HOST_MULTIARCH)
+	install -m644 $(DESTDIR_pic)/usr/lib/$(DEB_HOST_MULTIARCH)/*_pic.a \
+		$(CURDIR)/debian/libagg-dev/usr/lib/$(DEB_HOST_MULTIARCH)
+
+		# Remove .la files / non-PIC .so files
+	find $(CURDIR)/debian/libagg-dev/usr/lib/$(DEB_HOST_MULTIARCH)/ -name "*.so*" | xargs rm
+	find $(CURDIR)/debian/libagg-dev/usr/lib/$(DEB_HOST_MULTIARCH)/ -name "*.la" | xargs rm
+	find $(CURDIR)/debian/libagg2-dev/usr/lib/$(DEB_HOST_MULTIARCH)/ -name "*.la" | xargs rm
+
+		# Remove libaggfontfreetype/libaggplatform* .so files
+	find $(CURDIR)/debian/libagg2-dev/usr/lib/$(DEB_HOST_MULTIARCH)/ -name "libaggfontfreetype.so*" | xargs rm
+	find $(CURDIR)/debian/libagg2-dev/usr/lib/$(DEB_HOST_MULTIARCH)/ -name "libaggplatform*.so*" | xargs rm
+
+		# Install so files in runtime package
+	mkdir -m755 -p $(CURDIR)/debian/libagg2t64/usr/lib/$(DEB_HOST_MULTIARCH)
+	mv $(DESTDIR_pic)/usr/lib/$(DEB_HOST_MULTIARCH)/libagg.so.* \
+		$(CURDIR)/debian/libagg2t64/usr/lib/$(DEB_HOST_MULTIARCH)
+	mv $(DESTDIR_pic)/usr/lib/$(DEB_HOST_MULTIARCH)/libagggpc.so.* \
+		$(CURDIR)/debian/libagg2t64/usr/lib/$(DEB_HOST_MULTIARCH)
+
+		# Fix pkg-config file in libagg-dev to point to PIC static library
+	sed 's/-lagg/-lagg_pic/' $(DESTDIR_pic)/usr/lib/$(DEB_HOST_MULTIARCH)/pkgconfig/libagg.pc \
+		> $(DESTDIR_nonpic)/usr/lib/$(DEB_HOST_MULTIARCH)/pkgconfig/libagg.pc
+
+override_dh_auto_clean:
+	rm -rf $(foreach f,$(FLAVOURS),obj-$(f))
+	rm -rf $(DESTDIR_pic)
+	dh_auto_clean
+
+override_dh_installchangelogs:
+	dh_installchangelogs ChangeLog

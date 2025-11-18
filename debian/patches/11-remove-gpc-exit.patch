@@ -1,0 +1,15 @@
+Description: Remove a call to exit(). These are unwanted to so files
+Author: John Horigan <john@glyphic.com>
+Forwarded: not-needed
+
+--- a/gpc/gpc.c
++++ b/gpc/gpc.c
+@@ -110,7 +110,7 @@
+ #define MALLOC(p, b, s, t) {if ((b) > 0) { \
+                             p= (t*)malloc(b); if (!(p)) { \
+                             fprintf(stderr, "gpc malloc failure: %s\n", s); \
+-                            exit(0);}} else p= NULL;}
++                            }} else p= NULL;}
+ 
+ #define FREE(p)            {if (p) {free(p); (p)= NULL;}}
+ 

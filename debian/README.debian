@@ -1,0 +1,14 @@
+agg for Debian
+--------------
+
+Package agg contains a subset of the files under the directory agg-2.4
+in the subversion repository at https://svn.code.sf.net/p/agg/svn/
+Revision r144 is currently used for package agg.
+
+Other source files removed
+--------------------------
+Upstream agg contains several directories that are not relevant to libagg
+under Debian: agg2d, bin, and myapp. These have been removed.
+
+ -- John Horigan <john@glyphic.com>  Wed, 14 Jun 2017 22:52:07 -0700
+
