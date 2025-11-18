@@ -1,0 +1,15 @@
+Description: Change the ABI from major:minor:micro style to linux
+  style current:revision:age
+Author: John Horigan <john@glyphic.com>
+
+--- a/configure.ac
++++ b/configure.ac
+@@ -127,7 +127,7 @@
+ dnl ###############################################
+ 
+ dnl Settung up library version
+-AGG_LIB_VERSION="2:7:0"
++AGG_LIB_VERSION="3:1:1"
+ dnl     current-´ / /
+ dnl    revision--´ /
+ dnl         age---´

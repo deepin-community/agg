@@ -1,0 +1,8 @@
+01-disable-gpc.patch
+02-maintainer-mode.patch
+04-no-rpath.patch
+05-no-agg_conv_gpc.h.patch
+07-autogen-noconfigure.patch
+08-fix-kfreebsd-ftbfs.patch
+09-fix-hurd-ftbfs.patch
+10-change-ABI-to-linux.patch

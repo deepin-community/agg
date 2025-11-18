@@ -1,0 +1,29 @@
+agg for Debian
+--------------
+
+Package agg contains a subset of the files under the directory agg-2.4
+in the subversion repository at https://svn.code.sf.net/p/agg/svn/
+Revision r128 is currently used for package agg.
+
+Removal of gpc
+--------------
+Upstream agg comes with gpc, the General Polygon Clipper library. gpc
+has a non-free license that allows non-commercial use only. Commercial
+users must pay for a commercial license. So it is removed from the
+Debian package. Files removed:
+  gpc/VERSIONS.TXT
+  gpc/copying.txt
+  gpc/gpc.c
+  gpc/gpc.h
+  include/agg_conv_gpc.h
+
+Files remaining:
+  gpc/Makefile.am
+
+Other source files removed
+--------------------------
+Upstream agg contains several directories that are not relevant to libagg
+under Debian: agg2d, bin, and myapp. These have been removed.
+
+ -- John Horigan <john@glyphic.com>  Wed, 14 Jun 2017 22:52:07 -0700
+
