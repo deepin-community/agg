@@ -1,0 +1,3 @@
+# The upstream is a SourceForge subversion repository. There is no
+# reliable way to get versioned tarballs.
+version=4

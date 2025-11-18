@@ -1,15 +1,64 @@
-Source: template-repository
-Section: unknown
+Source: agg
 Priority: optional
-Maintainer: Tsic404 <liuheng@deepin.org>
-Build-Depends: debhelper (>= 11)
-Standards-Version: 4.1.3
-Homepage: https://github.com/deepin-community/template-repository
-#Vcs-Browser: https://salsa.debian.org/debian/deepin-community-template-repository
-#Vcs-Git: https://salsa.debian.org/debian/deepin-community-template-repository.git
+Maintainer: John Horigan <john@glyphic.com>
+Section: libs
+Build-Depends: autoconf,
+               automake,
+               debhelper-compat (= 12),
+               libfreetype6-dev,
+               libsdl1.2-dev,
+               libtool,
+               libx11-dev,
+               pkg-config
+Standards-Version: 4.5.0.0
+Homepage: http://www.antigrain.com
+Rules-Requires-Root: binary-targets
 
-Package: template-repository
+Package: libagg-dev
+Section: libdevel
+Conflicts: libagg23-dev, libagg2, libagg2-dev
 Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}
+Description: AntiGrain Geometry graphical toolkit (static development files)
+ Anti-Grain Geometry (AGG) is a general purpose graphical toolkit written
+ completely in standard and platform independent C++. It can be used in many
+ areas of computer programming where high quality 2D graphics is an essential
+ part of the project.
+ .
+ This package contains the development files for building applications using
+ agg, static libraries only.
+
+
+Package: libagg2-dev
+Section: libdevel
+Conflicts: libagg23-dev, libagg-dev
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, libagg2 (= ${binary:Version})
+Description: AntiGrain Geometry graphical toolkit (static and shared development files)
+ Anti-Grain Geometry (AGG) is a general purpose graphical toolkit written
+ completely in standard and platform independent C++. It can be used in many
+ areas of computer programming where high quality 2D graphics is an essential
+ part of the project.
+ .
+ This package contains the development files for building applications using
+ agg, static and shared libraries.
+
+
+Package: libagg2
+Conflicts: libagg23-dev, libagg-dev
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+Description: AntiGrain Geometry graphical toolkit (runtime files)
+ Anti-Grain Geometry (AGG) is a general purpose graphical toolkit written
+ completely in standard and platform independent C++. It can be used in many
+ areas of computer programming where high quality 2D graphics is an essential
+ part of the project.
+ .
+ This package contains runtime libraries for applications built using the
+ libagg shared library.
